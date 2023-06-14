@@ -819,6 +819,13 @@ class cf7_sendpdf
                 delete_transient('pdf_password');
             }
 
+            // If PDF name is dinamic
+            if ($this->is_pdfname_bracked_includes($meta_values["pdf-name"])) {
+                set_transient('pdf_uniqueid', '');
+            }
+
+            $pdf_uniqueid = "-" . get_transient('pdf_uniqueid');
+
             $nbPassword = 12;
             if (isset($meta_values["protect_password_nb"]) && $meta_values["protect_password_nb"] != '' && is_numeric($meta_values["protect_password_nb"])) {
                 $nbPassword = esc_html($meta_values["protect_password_nb"]);
@@ -930,7 +937,7 @@ class cf7_sendpdf
                     }
                 }
 
-                // Si option fillable, on genere les champs et remplace les données                   
+                // Si option fillable, on genere les champs et remplace les données
                 $contact_form = WPCF7_ContactForm::get_instance(esc_html($post['_wpcf7']));
                 $contact_tag = $contact_form->scan_form_tags();
                 foreach ($contact_tag as $sh_tag) {
@@ -1028,7 +1035,7 @@ class cf7_sendpdf
                 }
 
                 $text = str_replace('[reference]', sanitize_text_field(get_transient('pdf_uniqueid')), $text);
-                $text = str_replace('[url-pdf]', str_replace($upload_dir['basedir'], $upload_dir['baseurl'], $createDirectory) . '/' . $nameOfPdf . '-' . sanitize_text_field(get_transient('pdf_uniqueid')) . '.pdf', $text);
+                $text = str_replace('[url-pdf]', str_replace($upload_dir['basedir'], $upload_dir['baseurl'], $createDirectory) . "/{$nameOfPdf}{$pdf_uniqueid}.pdf", $text);
 
                 $cf7_file_field_name = $meta_values['file_tags']; // [file uploadyourfile]
                 if (!empty($cf7_file_field_name)) {
@@ -1078,7 +1085,7 @@ class cf7_sendpdf
 
                 // On insère dans la BDD
                 if (isset($meta_values["disable-insert"]) && $meta_values["disable-insert"] == "false") {
-                    $insertPost = $this->save($post['_wpcf7'], serialize($csvTab), esc_url(str_replace($upload_dir['basedir'], $upload_dir['baseurl'], $createDirectory) . '/' . $nameOfPdf . '-' . sanitize_text_field(get_transient('pdf_uniqueid')) . '.pdf'));
+                    $insertPost = $this->save($post['_wpcf7'], serialize($csvTab), esc_url(str_replace($upload_dir['basedir'], $upload_dir['baseurl'], $createDirectory) . "/{$nameOfPdf}{$pdf_uniqueid}.pdf"));
                     $text = str_replace('[ID]', $insertPost, $text);
                 }
 
@@ -1349,15 +1356,16 @@ class cf7_sendpdf
                         $mpdf->SetProtection(array('print', 'fill-forms'), $pdfPassword, $pdfPassword, 128);
                     }
 
-                    // $mpdf->Output($createDirectory . '/' . $nameOfPdf . '-' . get_transient('pdf_uniqueid') . '.pdf', 'F');
-                    $mpdf->Output($createDirectory . '/' . $nameOfPdf . '-' . get_transient('pdf_uniqueid') . '.pdf', 'F');
+                    $PDFDirectory =  "{$createDirectory}/{$nameOfPdf}{$pdf_uniqueid}.pdf";
+
+                    $mpdf->Output($PDFDirectory, 'F');
 
                     // On efface l'ancien pdf renommé si il y a (on garde l'original)
                     if (file_exists($createDirectory . '/' . $nameOfPdf . '.pdf')) {
-                        unlink($createDirectory . '/' . $nameOfPdf . '.pdf');
+                        // unlink($createDirectory . '/' . $nameOfPdf . '.pdf');
                     }
                     // Je copy le PDF genere
-                    copy($createDirectory . '/' . $nameOfPdf . '-' . get_transient('pdf_uniqueid') . '.pdf', $createDirectory . '/' . $nameOfPdf . '.pdf');
+                    copy($PDFDirectory, $createDirectory . '/' . $nameOfPdf . '.pdf');
                 }
                 // END GENERATE PDF
 
@@ -2254,5 +2262,17 @@ class cf7_sendpdf
             </script>
         <?php } ?>
 <?php
+    }
+
+
+    private function is_pdfname_bracked_includes($name)
+    {
+        return preg_match('/^\[.*\]$/', $name);
+    }
+
+
+    private function wpcf7_get_meta_data($id)
+    {
+        return get_post_meta(sanitize_textarea_field($id), '_wp_cf7pdf', true);
     }
 }
