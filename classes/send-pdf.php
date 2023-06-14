@@ -2269,10 +2269,4 @@ class cf7_sendpdf
     {
         return preg_match('/^\[.*\]$/', $name);
     }
-
-
-    private function wpcf7_get_meta_data($id)
-    {
-        return get_post_meta(sanitize_textarea_field($id), '_wp_cf7pdf', true);
-    }
 }
