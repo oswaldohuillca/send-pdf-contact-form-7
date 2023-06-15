@@ -1870,8 +1870,24 @@ if (isset($_GET['deleted']) && $_GET['deleted'] == 1) {
             }
 
             $list = cf7_sendpdf::wpcf7pdf_listing(esc_html($idForm), esc_html($limitList));
+
+            //Table headers
+            $table_heads = array("download", "reference", "date");
+
+            //CF7 meta fields
+            $meta_fields = get_post_meta(intval($idForm), '_wp_cf7pdf_fields', true);
+
+            foreach ($meta_fields as $field) {
+              preg_match('#\[(.*?)\]#', $field, $nameField);
+              $nb = $nameField[1];
+              if ($nb) {
+                array_push($table_heads, $nb);
+              }
+            }
+
+
             if ($list) { ?>
-              <div style="padding:5px;margin-bottom:10px;">
+              <div style="padding:5px;margin-bottom:10px; overflow-x: scroll;">
                 <div>
                   <form method="post" action="#listing">
 
@@ -1883,17 +1899,24 @@ if (isset($_GET['deleted']) && $_GET['deleted'] == 1) {
                 </div>
 
                 <?php
-                echo '<table>';
-                echo '<th>&nbsp;</th><th>&nbsp;</th><th>&nbsp;</th>';
+                echo '<table >';
+                echo "<thead> <tr>";
+                foreach ($table_heads as $head) {
+                  echo "<th>{$head}</th>";
+                }
+                echo "</tr> </thead>";
 
                 foreach ($list as $recorder) {
-                  echo '<tr width="100%">';
                   $datas = unserialize($recorder->wpcf7pdf_data);
-                  echo '<td width="80%">';
-                  //var_dump($datas);
+                  echo '<tr>';
+                  echo '<td width="">';
                   echo '<a href="' . esc_url($recorder->wpcf7pdf_files) . '" target="_blank">' . esc_html($datas[0]) . '</a> - ' . esc_html($datas[1]);
-
                   echo '</td>';
+
+                  for ($i = 0; $i < count($datas); $i++) {
+                    echo "<td>{$datas[$i]}</td>";
+                  }
+
                   echo '<td width="5%"><a href="' . esc_url($recorder->wpcf7pdf_files) . '" target="_blank"><img src="' . esc_url(WPCF7PDF_URL . 'images/icon_download.png') . '" width="30" title="' . __('Download', WPCF7PDF_TEXT_DOMAIN) . '" alt="' . __('Download', WPCF7PDF_TEXT_DOMAIN) . '" /></a></td>';
                 ?><td width="5%"><a href="#" data-idform="<?php echo esc_html($idForm); ?>" data-id="<?php echo esc_html($recorder->wpcf7pdf_id); ?>" data-message="<?php _e('Are you sure you want to delete this Record?', WPCF7PDF_TEXT_DOMAIN); ?>" data-nonce="<?php echo wp_create_nonce('delete_record-' . esc_html($recorder->wpcf7pdf_id)); ?>" class="delete-record"><img src="<?php echo esc_url(WPCF7PDF_URL . 'images/icon_delete.png'); ?>" width="30" title="<?php _e('Delete', WPCF7PDF_TEXT_DOMAIN); ?>" alt="<?php _e('Delete', WPCF7PDF_TEXT_DOMAIN); ?>" /></a>
                   <?php
@@ -1909,7 +1932,10 @@ if (isset($_GET['deleted']) && $_GET['deleted'] == 1) {
                   <tr>
                     <td width="5%">
                       <div>
-                        <span class="dashicons dashicons-download"></span> <a href="<?php echo wp_nonce_url(admin_url('admin.php?page=wpcf7-send-pdf&amp;idform=' . esc_html($_POST['idform']) . '&amp;csv=1'), 'go_generate', 'csv_security'); ?>" alt="<?php _e('Export list', WPCF7PDF_TEXT_DOMAIN); ?>" title="<?php _e('Export list', WPCF7PDF_TEXT_DOMAIN); ?>"><?php _e('Export list in CSV file', WPCF7PDF_TEXT_DOMAIN); ?></a>
+                        <span class="dashicons dashicons-download"></span>
+                        <a href="<?php echo wp_nonce_url(admin_url('admin.php?page=wpcf7-send-pdf&amp;idform=' . esc_html($_POST['idform']) . '&amp;csv=1'), 'go_generate', 'csv_security'); ?>" alt="<?php _e('Export list', WPCF7PDF_TEXT_DOMAIN); ?>" title="<?php _e('Export list', WPCF7PDF_TEXT_DOMAIN); ?>">
+                          <?php _e('Export list in CSV file', WPCF7PDF_TEXT_DOMAIN); ?>
+                        </a>
                       </div>
                   </tr>
                 </tbody>
