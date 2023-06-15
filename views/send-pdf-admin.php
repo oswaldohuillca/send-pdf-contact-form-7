@@ -1914,7 +1914,7 @@ if (isset($_GET['deleted']) && $_GET['deleted'] == 1) {
                   echo '</td>';
 
                   for ($i = 0; $i < count($datas); $i++) {
-                    echo "<td>{$datas[$i]}</td>";
+                    echo "<td align='center'>{$datas[$i]}</td>";
                   }
 
                   echo '<td width="5%"><a href="' . esc_url($recorder->wpcf7pdf_files) . '" target="_blank"><img src="' . esc_url(WPCF7PDF_URL . 'images/icon_download.png') . '" width="30" title="' . __('Download', WPCF7PDF_TEXT_DOMAIN) . '" alt="' . __('Download', WPCF7PDF_TEXT_DOMAIN) . '" /></a></td>';
