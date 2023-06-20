@@ -1870,7 +1870,11 @@ if (isset($_GET['deleted']) && $_GET['deleted'] == 1) {
             }
 
             $list = cf7_sendpdf::wpcf7pdf_listing(esc_html($idForm), esc_html($limitList));
+            $pdfFormList = cf7_sendpdf::get_list(intval($idForm));
 
+            echo "<pre>";
+            print_r($pdfFormList[0]->wpcf7pdf_files);
+            echo "</pre>";
             //Table headers
             $table_heads = array("download", "reference", "date");
 

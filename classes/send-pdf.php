@@ -1362,7 +1362,7 @@ class cf7_sendpdf
 
                     // On efface l'ancien pdf renommé si il y a (on garde l'original)
                     if (file_exists($createDirectory . '/' . $nameOfPdf . '.pdf')) {
-                        // unlink($createDirectory . '/' . $nameOfPdf . '.pdf');
+                        unlink($createDirectory . '/' . $nameOfPdf . '.pdf');
                     }
                     // Je copy le PDF genere
                     copy($PDFDirectory, $createDirectory . '/' . $nameOfPdf . '.pdf');
@@ -2143,8 +2143,9 @@ class cf7_sendpdf
                 foreach ($pdfFormList as $pdfList) {
                     $list = array();
                     $pdfData = unserialize($pdfList->wpcf7pdf_data);
+                    $pdfURL = $pdfList->wpcf7pdf_files;
 
-                    array_push($list, $createDirectory . '/' . $nameOfPdf . '-' . $pdfData[0] . '.pdf');
+                    array_push($list, $pdfURL);
                     foreach ($pdfData as $data) {
                         array_push($list, $data);
                     }
